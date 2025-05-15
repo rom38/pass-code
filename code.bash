@@ -35,7 +35,21 @@ code_decrypt() {
 
 # Will not print anything if code_decrypt not run or key not in mapping
 code_encode() { while read -r dec; do echo "${codec[Dx$dec]}"; done; }
-code_decode() { while read -r enc; do echo "${codec[Ex$enc]}"; done; }
+code_decode() { 
+  local enc2 enc3 x1b
+	x1b="$(echo -en '\x1B')"
+
+  while read -r enc; do
+    # enc2="$(echo $enc | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')"
+
+    # Delete color control codes (e.g. "\x1B[0m")
+		enc3="${enc#${x1b}*m}"
+		enc3="${enc3%${x1b}*}"
+    # echo $enc3 | xxd
+		dec="${codec["Ex$enc3"]}"
+    echo "$dec"
+  done
+}
 
 # $1 is decoded, $2 is encoded
 code_add() {
